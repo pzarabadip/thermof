@@ -5,7 +5,7 @@ import yaml
 def read_yaml(yaml_file):
     """ Read given yaml file """
     with open(yaml_file, 'r') as f:
-        var = yaml.load(f)
+        var = yaml.safe_load(f)
     return var
 
 
