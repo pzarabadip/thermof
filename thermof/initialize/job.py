@@ -4,6 +4,8 @@
 Initializing job submission files for computing cluster
 """
 import os
+# import yaml
+from string import Template
 from thermof.sample import slurm_file, slurm_scratch_file, pbs_file
 from . import read_lines, write_lines
 
@@ -43,10 +45,12 @@ def write_slurm_file(file_name, jobpar, sample):
 
 def write_pbs_file(file_name, jobpar, sample):
     """ Write PBS job submission file """
-    job_lines = read_lines(sample)
-    job_lines[3] = '#PBS -N %s\n' % jobpar['name']
-    job_lines[4] = '#PBS -q %s\n' % jobpar['queue']
-    job_lines[5] = '#PBS -l nodes=%i:ppn=%i\n' % (jobpar['nodes'], jobpar['ppn'])
-    job_lines[6] = '#PBS -l walltime=%s\n' % jobpar['walltime']
-    job_lines[15] = 'prun lammps < %s > %s' % (jobpar['input'], jobpar['output'])
-    write_lines(file_name, job_lines)
+
+    with open(sample) as fobj:
+        job_lines = fobj.read()
+
+    inp2 = Template(job_lines).safe_substitute(jobpar)
+
+    with open(file_name,'w+') as fobj:
+        fobj.write(inp2)
+    

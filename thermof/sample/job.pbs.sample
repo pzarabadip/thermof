@@ -1,22 +1,18 @@
 #!/bin/bash
 
-#PBS -j oe
-#PBS -N MOF5-333
-#PBS -q idist_big
-#PBS -l nodes=1:ppn=8
-#PBS -l walltime=24:00:00
-#PBS -S /bin/bash
+# Defining the PBS parameters
+#PBS -l select=$nodes:ncpus=$ncpus:mpiprocs=$mpiprocs:ompthreads=$ompthreads
+#PBS -l walltime=$walltime
+#PBS -A $projectid
+#PBS -q $queue
+#PBS -N $name
+#PBS -o scheduler.$name.log
+#PBS -e scheduler.$name.err
 
-echo JOB_ID: $PBS_JOBID JOB_NAME: $PBS_JOBNAME HOSTNAME: $PBS_O_HOST
-echo start_time: `date`
+# Loading LAMMPS module
 cd $PBS_O_WORKDIR
-module purge
-module load lammps/31Mar17
 
-prun lammps < in.thermof > lammps_out.txt
+ml LAMMPS/20200109-intel-2017c
 
-echo end_time: `date`
-# workaround for .out / .err files not always being copied back to $PBS_O_WORKDIR
-cp /var/spool/torque/spool/$PBS_JOBID.OU $PBS_O_WORKDIR/$PBS_JOBID$(hostname)_$$.out
-cp /var/spool/torque/spool/$PBS_JOBID.ER $PBS_O_WORKDIR/$PBS_JOBID$(hostname)_$$.err
-exit
+# Running the job
+mpirun -np $ncpus lammps -in $input -log $output
